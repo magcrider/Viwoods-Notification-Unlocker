@@ -1,7 +1,8 @@
 # Viwoods Notification Unlocker (Magisk Module)
 
-[!Platform](https://www.android.com/)
-[!Magisk](https://github.com/topjohnwu/Magisk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
+[![Magisk](https://img.shields.io/badge/Magisk-30.5%2B-00B39B.svg)](https://github.com/topjohnwu/Magisk)
 
 A Magisk module that removes the hardcoded notification whitelist on Viwoods eink reader devices, allowing all apps to display notifications.
 
@@ -28,7 +29,7 @@ A Magisk module that removes the hardcoded notification whitelist on Viwoods ein
 
 ## 🔍 **The Problem**
 
-Viwoods e-ink readers implement aggressive notification blocking through a **hardcoded whitelist** in the Android framework. Only pre-approved apps can display notifications.
+Viwoods eink readers implement aggressive notification blocking through a **hardcoded whitelist** in the Android framework. Only pre-approved apps can display notifications.
 
 ### **Technical Details**
 **Location:** `/system/framework/services.jar`
