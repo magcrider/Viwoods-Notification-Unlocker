@@ -46,7 +46,6 @@ If this module saved you time or frustration, consider supporting development:
 ## 🔍 Background
 
 The Viwoods Reader blocks notifications using a **hardcoded application whitelist** inside the system services code.
-
 The check lives in `services.jar` (specifically `classes2.dex`) and drops notifications from non-whitelisted apps before they are posted, even when notification permissions are enabled.
 
 ### Technical Context
@@ -84,10 +83,17 @@ This Magisk module **patches `classes2.dex` inside `services.jar` systemlessly**
 ### Steps
 
 1. Download the module `.zip` from **Releases**
-2. Open **Magisk** → **Modules**
+2. Open **Magisk → Modules**
 3. Select **Install from storage**
 4. Choose the downloaded `.zip`
 5. Reboot
+
+---
+
+## ⚡ Recommended [![Download inkOS](https://img.shields.io/badge/Download-inkOS-brightgreen?style=flat\&logo=android)](https://github.com/gezimos/inkOS/releases/latest)
+
+Since the Viwoods Reader **lacks a native pull-down notification tray**, it is **recommended to use [inkOS](https://github.com/gezimos/inkOS)** — a minimalist, **eink‑friendly Android launcher with notification tray support**.
+*Provides a gesture assignable notification tray while native pop-ups continue to work without it.*
 
 ---
 
