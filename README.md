@@ -73,8 +73,7 @@ if (!ALLOWED_PKGS.contains(packageName)) {
 2. **Magisk Manager** → **Modules** → **Install from storage**
 3. Select `.zip` → **Reboot**
 
-**Recommended:** InkOS Launcher for notification tray.
-
+Recommended: [InkOS Launcher](https://github.com/gezimos/inkOS) – the Viwoods Reader lacks a proper notification pull-down (pop-ups work), and InkOS provides a configurable notification tray gesture with the ability to clear notifications.
 ---
 
 ## 🗑️ **Uninstallation**
