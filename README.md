@@ -1,115 +1,148 @@
-# Viwoods Notification Unlocker (Magisk Module)
+
+---
+
+# 📬 Viwoods Notification Unlocker
+
+**Magisk module to enable notifications for all apps on the Viwoods Reader**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
-[![Magisk](https://img.shields.io/badge/Magisk-30.5%2B-00B39B.svg)](https://github.com/topjohnwu/Magisk)
+[![Magisk](https://img.shields.io/badge/Magisk-Compatible-00B39B.svg)](https://github.com/topjohnwu/Magisk)
 
-A Magisk module that removes the hardcoded notification whitelist on Viwoods eink reader devices, allowing all apps to display notifications.
-
-***
-
-## 📱 **Compatibility**
-
-**Tested Configuration:**
-- **Device:** Viwoods Reader  
-- **ViWoods Software Version:** 1.1.0
-
-**Other Viwoods Devices:**
-- May work on other Viwoods eink readers *(untested)*
-- Different software versions may have different patch locations
-- **Use at your own risk**
-
-**Requirements:**
-- **Unlocked bootloader**
-- **Rooted with Magisk 30.5+** *(patched init_boot.img via Magisk app required)*
-
-> ⚠️ **WARNING:** This module is **specifically tested ONLY on Viwoods software version 1.1.0**. Other versions may have different code structure and the patch may not work or could cause issues.
+> Unlock system-blocked notifications on the Viwoods Reader.
+> This module removes the hardcoded notification whitelist present in **Viwoods firmware**, allowing **all apps** to post notifications normally.
 
 ---
 
-## 🔍 **The Problem**
+## 💖 Support the Project
 
-Viwoods eink readers implement aggressive notification blocking through a **hardcoded whitelist** in the Android framework. Only pre-approved apps can display notifications.
+If this module saved you time or frustration, consider supporting development:
 
-### **Technical Details**
-**Location:** `/system/framework/services.jar`
-- **DEX File:** `classes2.dex`
-- **Class:** `com.android.server.notification.NotificationManagerService`
-- **Method:** `enqueueNotificationInternal()`
-- **Smali Line:** 9366
-
-**Blocking Behavior:**
-```java
-// Pseudocode
-if (!ALLOWED_PKGS.contains(packageName)) {
-    Log.d(TAG, "eink project,Blocked notification from package: " + packageName);
-    return; // Notification dropped
-}
-```
-
-**Result:** Third-party apps *(Signal, Telegram, Gmail, etc.)* cannot display notifications.
-
-***
-
-## ✅ **The Solution**
-
-**Patches line 9366** in `NotificationManagerService.smali`:
-
-| **Original** | **Patched** |
-|--------------|-------------|
-| `if-nez v2, :cond_68` | `goto :cond_68` |
-
-**Effect:** Bypasses whitelist check entirely - **all apps work**.
-
-**Systemless** via Magisk - fully reversible.
-
-***
-
-## 📦 **Module Installation**
-
-**Requires rooted device with Magisk 30.5+**
-
-1. Download `.zip` from Releases
-2. **Magisk Manager** → **Modules** → **Install from storage**
-3. Select `.zip` → **Reboot**
-
-Recommended: [InkOS Launcher](https://github.com/gezimos/inkOS) – the Viwoods Reader lacks a proper notification pull-down (pop-ups work), and InkOS provides a configurable notification tray gesture with the ability to clear notifications.
----
-
-## 🗑️ **Uninstallation**
-
-**Magisk Manager** → **Modules** → **Viwoods Notification Unlocker** → **Trash** → **Reboot**
-
-***
-
-## 📊 **Before & After**
-
-| **Before** | **After** |
-|------------|-----------|
-| `eink project,Blocked notification from package: org.telegram.messenger` | ✅ **No blocking messages** |
-| ❌ **Third-party apps blocked** | ✅ **All apps work** |
+<p align="center">
+  <a href="https://buymeacoffee.com/ScreenSensitive" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="50">
+  </a>
+</p>
 
 ---
 
-## ⚠️ **Warnings**
+## 📱 Compatibility
 
-- **Tested ONLY on Viwoods Reader (Non color) 1.1.0**
-- OTA updates may break module
-- **Use at your own risk**
+### ✅ Tested
 
-***
+* **Device:** Viwoods Reader
+* **Firmware:** Viwoods software **1.1.0**
 
-## 🔧 **Technical**
+### ⚠️ Untested
 
-**SELinux Enforcing compatible** via `post-fs-data.sh`:
-```bash
-chcon u:object_r:system_file:s0 "$MODDIR/system/framework/services.jar"
-```
+* Other Viwoods devices
+* Other firmware versions
 
-***
+> **Important:** This module is verified **only on Viwoods firmware 1.1.0**.
+> Other versions may have different code paths or offsets.
 
-## ⚖️ **Disclaimer**
+---
 
-**"AS IS"** - no warranty. Not responsible for bricked devices, data loss, or voided warranties.
+## 🔍 Background
 
-**Star ⭐ if it helped!**
+The Viwoods Reader blocks notifications using a **hardcoded application whitelist** inside the system services code.
+
+The check lives in `services.jar` (specifically `classes2.dex`) and drops notifications from non-whitelisted apps before they are posted, even when notification permissions are enabled.
+
+### Technical Context
+
+* **File:** `/system/framework/services.jar`
+* **DEX:** `classes2.dex`
+* **Class:** `com.android.server.notification.NotificationManagerService`
+* **Method:** `enqueueNotificationInternal()`
+
+---
+
+## ✅ What This Module Does
+
+This Magisk module **patches `classes2.dex` inside `services.jar` systemlessly** to disable the notification whitelist check.
+
+### Patch Summary
+
+* Disables the notification whitelist check
+* Allows all applications to post notifications
+* Applied systemlessly via Magisk
+* Fully reversible by removing the module
+
+---
+
+## 📦 Installation
+
+### Requirements
+
+* **Unlocked bootloader**
+* **Root access via Magisk**
+
+  * Root **requires patching `init_boot.img`** using the Magisk app
+* Viwoods firmware **1.1.0**
+
+### Steps
+
+1. Download the module `.zip` from **Releases**
+2. Open **Magisk** → **Modules**
+3. Select **Install from storage**
+4. Choose the downloaded `.zip`
+5. Reboot
+
+---
+
+## 🗑️ Uninstallation
+
+1. Open **Magisk**
+2. Navigate to **Modules**
+3. Remove **Viwoods Notification Unlocker**
+4. Reboot
+
+---
+
+## ⚠️ Warnings & Notes
+
+* Designed specifically for the **Viwoods Reader firmware 1.1.0**
+* OTA updates may overwrite or invalidate the patch
+* Low-level system service modification — proceed at your own risk
+
+---
+
+## 🔧 Technical Notes
+
+* Systemless patch of `services.jar` (`classes2.dex`)
+* SELinux enforcing compatible
+* No permanent system partition changes
+* Safe to remove at any time
+
+---
+
+## ⚖️ Disclaimer
+
+This module is provided **"AS IS"**.
+By installing it, you acknowledge that you are responsible for any consequences, including but not limited to:
+
+* Bricked devices
+* Bootloops
+* Loss of data
+* Voided warranties
+
+The author is **not responsible** for any damage resulting from the use of this module. Use at your own risk.
+
+---
+
+## 📄 License
+
+MIT License — free to use, modify, and redistribute.
+
+---
+
+## ⭐ Support & Feedback
+
+If this module helped you:
+
+* ⭐ Star the repository
+* 🐞 Open an issue for firmware changes or breakage
+* ☕ Support development via Buy Me a Coffee
+
+---
