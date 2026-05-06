@@ -31,14 +31,16 @@ If this module saved you time or frustration, consider supporting development:
 ### ✅ Tested
 
 * **Device:** Viwoods Reader
-* **Firmware:** Viwoods software **1.1.0** and **1.2.3**
+* **Firmware:** Viwoods software **1.1.0**, **1.2.3**, and **1.3.8**
+
+> Use the release matching your firmware version — each version patches different code offsets.
 
 ### ⚠️ Untested
 
 * Other Viwoods devices
 * Other firmware versions
 
-> **Important:** This module is verified **only on Viwoods firmware 1.1.0 and 1.2.3**.
+> **Important:** This module is verified **only on Viwoods firmware 1.1.0, 1.2.3, and 1.3.8**.
 > Other versions may have different code paths or offsets.
 
 ---
@@ -53,7 +55,16 @@ The check lives in `services.jar` (specifically `classes2.dex`) and drops notifi
 * **File:** `/system/framework/services.jar`
 * **DEX:** `classes2.dex`
 * **Class:** `com.android.server.notification.NotificationManagerService`
-* **Method:** `enqueueNotificationInternal()`
+
+Firmware **1.3.8** introduced two additional filter points compared to earlier versions:
+
+| Method | Filter |
+|--------|--------|
+| `enqueueNotificationInternal()` | `ALLOWED_PKGS` hardcoded package whitelist |
+| `checkDisqualifyingFeatures()` | XOR-inverted `areNotificationsEnabledForPackageInt()` result |
+| `PostNotificationRunnable.postNotification()` | `POST_NOTIFICATIONS` permission check against the whitelist |
+
+All three are patched in the 1.3.8 release.
 
 ---
 
@@ -78,7 +89,7 @@ This Magisk module **patches `classes2.dex` inside `services.jar` systemlessly**
 * **Root access via Magisk**
 
   * Root **requires patching `init_boot.img`** using the Magisk app
-* Viwoods firmware **1.1.0 or 1.2.3**
+* Viwoods firmware **1.1.0**, **1.2.3**, or **1.3.8**
 
 ### Steps
 
@@ -108,7 +119,7 @@ Since the Viwoods Reader **lacks a native pull-down notification tray**, it is *
 
 ## ⚠️ Warnings & Notes
 
-* Designed specifically for the **Viwoods Reader firmware 1.1.0/1.2.3**
+* Designed specifically for the **Viwoods Reader firmware 1.1.0, 1.2.3, and 1.3.8**
 * OTA updates may overwrite or invalidate the patch
 * Low-level system service modification — proceed at your own risk
 
