@@ -1,0 +1,8 @@
+apktool
+apktool.jar
+backup/
+extracted/
+services_decompiled/
+verify_patch/
+module/
+*.zip
