@@ -3,24 +3,50 @@
 
 # 📬 Viwoods Notification Unlocker
 
-**Magisk module to enable notifications for all apps on the Viwoods Reader**
+**Magisk module to restore notifications on the Viwoods AiPaper**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
 [![Magisk](https://img.shields.io/badge/Magisk-Compatible-00B39B.svg)](https://github.com/topjohnwu/Magisk)
 
-> Unlock system-blocked notifications on the Viwoods Reader.
-> This module removes the hardcoded notification whitelist present in **Viwoods firmware**, allowing **all apps** to post notifications normally.
+---
+
+## ⚠️ DISCLAIMER — READ BEFORE ANYTHING ELSE
+
+**By using this module you accept full responsibility for anything that happens to your device.**
+
+This includes but is not limited to:
+
+- **Bootloops or soft bricks**
+- **Complete loss of data**
+- **Voided warranty**
+- **Device becoming unusable**
+
+The author is **not responsible** for any damage resulting from following this guide. If you are not comfortable recovering a device using `mtkclient` or `fastboot`, **do not proceed**.
+
+---
+
+## ⛔ GOOGLE / FRP WARNING — READ THIS BEFORE UNLOCKING
+
+If you previously enabled Google Play Services on your Viwoods AiPaper, take these steps **before** unlocking the bootloader:
+
+1. Sign out of the Google Play Store
+2. Remove all Google accounts from Android Settings (not just the Viwoods UI)
+3. Disable the Google Play Services toggle in Viwoods Settings
+
+**Why:** Unlocking the bootloader wipes the device. The Viwoods AiPaper does **not** have a proper Android FRP recovery screen. If a Google account is still linked when you wipe, you may end up FRP-locked with no easy way out.
+
+> **Learned the hard way:** If you do hit FRP after unlocking — enable Google Play Services once, sign into the Play Store, sign back out, remove all Google accounts in Settings, disable Google Play Services again, then factory reset. After that, setup completes normally.
+
+*If you never enabled Google Play Services, you can ignore this.*
 
 ---
 
 ## 💖 Support the Project
 
-If this module saved you time or frustration, consider supporting development:
-
 <p align="center">
-  <a href="https://buymeacoffee.com/ScreenSensitive" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="50">
+  <a href="https://ko-fi.com/eymagic" target="_blank">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support on Ko-fi" height="50">
   </a>
 </p>
 
@@ -28,138 +54,123 @@ If this module saved you time or frustration, consider supporting development:
 
 ## 📱 Compatibility
 
-### ✅ Tested
+| Firmware | Status |
+|----------|--------|
+| 1.4.0 | ✅ Tested |
+| 1.3.8 | ✅ Tested |
+| 1.1.0, 1.2.3 | See [upstream repo](#-attribution) |
 
-* **Device:** Viwoods Reader
-* **Firmware:** Viwoods software **1.1.0**, **1.2.3**, and **1.3.8**
-
-> Use the release matching your firmware version — each version patches different code offsets.
-
-### ⚠️ Untested
-
-* Other Viwoods devices
-* Other firmware versions
-
-> **Important:** This module is verified **only on Viwoods firmware 1.1.0, 1.2.3, and 1.3.8**.
-> Other versions may have different code paths or offsets.
+> Each firmware version patches different code locations. Use the release matching your firmware exactly.
 
 ---
 
 ## 🔍 Background
 
-The Viwoods Reader blocks notifications using a **hardcoded application whitelist** inside the system services code.
-The check lives in `services.jar` (specifically `classes2.dex`) and drops notifications from non-whitelisted apps before they are posted, even when notification permissions are enabled.
+Viwoods firmware silently blocks notifications from most apps using a hardcoded whitelist buried inside the Android system. Apps not on that list are rejected before the notification ever reaches your screen — even if you have granted permissions in Settings.
 
-### Technical Context
+This module removes that restriction. **Many apps** will work after installing it. Some Google apps (Gmail, GMS-specific flows) still have limitations — see [Known Limitations](#-known-limitations).
 
-* **File:** `/system/framework/services.jar`
-* **DEX:** `classes2.dex`
-* **Class:** `com.android.server.notification.NotificationManagerService`
-
-Firmware **1.3.8** introduced two additional filter points compared to earlier versions:
-
-| Method | Filter |
-|--------|--------|
-| `enqueueNotificationInternal()` | `ALLOWED_PKGS` hardcoded package whitelist |
-| `checkDisqualifyingFeatures()` | XOR-inverted `areNotificationsEnabledForPackageInt()` result |
-| `PostNotificationRunnable.postNotification()` | `POST_NOTIFICATIONS` permission check against the whitelist |
-
-All three are patched in the 1.3.8 release.
+For the full technical breakdown: [Technical Analysis](context/ANALYSIS.md) · [Project Context](context/CONTEXT.md)
 
 ---
 
 ## ✅ What This Module Does
 
-This Magisk module **patches `classes2.dex` inside `services.jar` systemlessly** to disable the notification whitelist check.
-
-### Patch Summary
-
-* Disables the notification whitelist check
-* Allows all applications to post notifications
-* Applied systemlessly via Magisk
-* Fully reversible by removing the module
+- Removes Viwoods' custom notification blocking from the system
+- Lets most third-party apps (WhatsApp, Telegram, etc.) post notifications
+- Prevents Viwoods' aggressive background process killer from stopping apps before notifications arrive
+- Applied without permanently modifying the system partition (Magisk systemless)
+- Fully reversible — remove the module to restore original behavior
 
 ---
 
 ## 📦 Installation
 
-### Requirements
+### 🔒 STEP 0 — FULL BACKUP (MANDATORY)
 
-* **Unlocked bootloader**
-* **Root access via Magisk**
+**Do not skip this.** A full backup is your only reliable recovery method if something goes wrong.
 
-  * Root **requires patching `init_boot.img`** using the Magisk app
-* Viwoods firmware **1.1.0**, **1.2.3**, or **1.3.8**
+Use [mtkclient](https://github.com/bkerler/mtkclient):
 
-### Steps
+```sh
+# Power off device → hold Volume Down → connect USB (BROM mode)
+python mtk.py rl backup_folder/ --skip userdata
+```
 
-1. Download the module `.zip` from **Releases** Use the correct version for your FW version.
-2. Open **Magisk → Modules**
-3. Select **Install from storage**
-4. Choose the downloaded `.zip`
-5. Reboot
+> **BROM mode tip:** Power off completely, then hold **Volume Down** and connect the USB cable. Keep holding until mtkclient shows a connection in the terminal — then release the button (usually 2–3 seconds after connecting). Releasing too early or too late means it won't detect the device.
 
----
-
-## ⚡ Recommended [![Download inkOS](https://img.shields.io/badge/Download-inkOS-brightgreen?style=flat\&logo=android)](https://github.com/gezimos/inkOS/releases/latest)
-
-Since the Viwoods Reader **lacks a native pull-down notification tray**, it is **recommended to use [inkOS](https://github.com/gezimos/inkOS)** — a minimalist, **eink‑friendly Android launcher with notification tray support**.
-*Provides a gesture assignable notification tray while native pop-ups continue to work without it.*
+- Back up **all partitions**
+- Store the backup somewhere safe on your PC
+- **If you skip this and something breaks, you may lose everything**
 
 ---
 
-## 🗑️ Uninstallation
+### 🔓 STEP 1 — Root Your Device
 
-1. Open **Magisk**
-2. Navigate to **Modules**
-3. Remove **Viwoods Notification Unlocker**
-4. Reboot
+This module requires an unlocked bootloader and Magisk root. If you haven't done this yet, you need to complete that first.
 
----
+The full rooting process for Viwoods AiPaper is documented by the community — search XDA Forums for the Viwoods Magisk rooting guide. Key requirements:
 
-## ⚠️ Warnings & Notes
+- **MediaTek drivers** installed on your PC
+- **ADB & Fastboot** installed
+- **mtkclient** for partition-level operations
+- **Magisk** latest stable
 
-* Designed specifically for the **Viwoods Reader firmware 1.1.0, 1.2.3, and 1.3.8**
-* OTA updates may overwrite or invalidate the patch
-* Low-level system service modification — proceed at your own risk
+> ⚠️ **Enable Google Services BEFORE rooting** — see the FRP warning at the top of this page.
 
 ---
 
-## 🔧 Technical Notes
+### 📲 STEP 2 — Install the Module
 
-* Systemless patch of `services.jar` (`classes2.dex`)
-* SELinux enforcing compatible
-* No permanent system partition changes
-* Safe to remove at any time
+1. Download the `.zip` from **[Releases](https://github.com/magcrider/Viwoods-Notification-Unlocker/releases)** — use the version matching your firmware
+2. Transfer the ZIP to your device via USB (File Transfer / MTP mode)
+3. Open **Magisk → Modules → Install from storage**
+4. Select the downloaded ZIP
+5. Reboot when prompted
 
 ---
 
-## ⚖️ Disclaimer
+### ✔️ STEP 3 — Verify It's Working
 
-This module is provided **"AS IS"**.
-By installing it, you acknowledge that you are responsible for any consequences, including but not limited to:
+After rebooting, send yourself a WhatsApp or Telegram message from another device and confirm the notification appears.
 
-* Bricked devices
-* Bootloops
-* Loss of data
-* Voided warranties
+To confirm the patch is active:
+```sh
+adb logcat | grep "eink"
+```
+If the module is working, this returns **no output**. If you still see `"eink project,Blocked notification from package:"` lines, the patch is not loading — check the [Installation Guide](context/INSTALLATION.md) for troubleshooting steps.
 
-The author is **not responsible** for any damage resulting from the use of this module. Use at your own risk.
+---
+
+## ⚠️ Known Limitations
+
+- **Google apps (Gmail, GMS):** Some Google notification flows go through a separate code path not yet covered by this patch. Work in progress — tracked in [Project Context](context/CONTEXT.md#outstanding-items)
+- **Gmail specifically:** Open Gmail → Menu → Settings → [account] → Notifications → set to **"All new mail"** — this must be done manually regardless of the module
+- **Newly installed apps:** Apps installed after the last reboot may need another reboot before the battery optimization bypass takes effect
+- **OTA firmware updates:** A Viwoods update will overwrite `services.jar` and disable the patch. Re-install the module after any firmware update
+
+---
+
+## 🗑️ Uninstall
+
+1. Open **Magisk → Modules**
+2. Remove **Viwoods Notification Unlocker**
+3. Reboot — the original notification whitelist is fully restored
+
+---
+
+## 🙏 Attribution
+
+This module is based on the original work by **ScreenSensitive**:
+
+👉 [ScreenSensitive/Viwoods-Notification-Unlocker](https://github.com/ScreenSensitive/Viwoods-Notification-Unlocker)
+
+The original module supported firmware 1.1.0 and 1.2.3. This fork extends support to 1.3.8 and 1.4.0, adds battery optimization fixes, and documents the additional filter points introduced in newer firmware.
 
 ---
 
 ## 📄 License
 
-MIT License — free to use, modify, and redistribute.
-
----
-
-## ⭐ Support & Feedback
-
-If this module helped you:
-
-* ⭐ Star the repository
-* 🐞 Open an issue for firmware changes or breakage
-* ☕ Support development via Buy Me a Coffee
+MIT — free to use, modify, and redistribute with attribution.
 
 ---
